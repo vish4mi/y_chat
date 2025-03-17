@@ -9,6 +9,7 @@ import FirebaseFirestore
 import FirebaseAuth
 import Combine
 import SwiftUI
+import FirebaseStorage
 
 class ChatViewModel: ObservableObject {
     @EnvironmentObject var authViewModel: AuthViewModel
@@ -302,6 +303,78 @@ class ChatViewModel: ObservableObject {
             } else {
                 print("Message marked as read!")
             }
+        }
+    }
+    
+    func uploadMedia(fileURL: URL) {
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        
+        // Generate a unique file name
+        let fileName = "\(UUID().uuidString)_\(fileURL.lastPathComponent)"
+        
+        // Create a reference to the file in Firebase Storage
+        let storageRef = Storage.storage().reference().child("media/\(currentUserId)/\(fileName)")
+        
+        // Upload the file
+        storageRef.putFile(from: fileURL, metadata: nil) { metadata, error in
+            if let error = error {
+                print("Error uploading file: \(error.localizedDescription)")
+                return
+            }
+            
+            // Get the download URL
+            storageRef.downloadURL { [weak self] url, error in
+                if let error = error {
+                    print("Error getting download URL: \(error.localizedDescription)")
+                    return
+                }
+                
+                if let downloadURL = url {
+                    if let mediaType = getMediaType(fileURL: downloadURL) {
+                        // Send the media message with the download URL
+                        self?.sendMediaMessage(mediaURL: downloadURL.absoluteString, mediaType: mediaType)
+                    }
+                }
+            }
+        }
+    }
+    
+    func sendMediaMessage(mediaURL: String, mediaType: MediaType) {
+        guard let currentUserId = Auth.auth().currentUser?.uid,
+        let currentUserName = Auth.auth().currentUser?.displayName
+        else { return }
+        
+        let newMessage = Message(
+            text: "", // Optional: Add a caption
+            senderId: currentUserId,
+            senderName: currentUserName,
+            timestamp: Date(),
+            mediaURL: mediaURL,
+            mediaType: mediaType
+        )
+        
+        // Add the new message to the local state
+        messages.append(newMessage)
+        
+        // Send the message to Firestore
+        let messageRef = Firestore.firestore()
+            .collection("conversations")
+            .document(conversationId)
+            .collection("messages")
+            .document(newMessage.id)
+        
+        do {
+            try messageRef.setData(from: newMessage) { error in
+                if let error = error {
+                    print("Error sending message: \(error.localizedDescription)")
+                    // Remove the message from local state if Firestore fails
+                    self.messages.removeAll { $0.id == newMessage.id }
+                } else {
+                    print("Media message sent successfully!")
+                }
+            }
+        } catch {
+            print("Error encoding message: \(error.localizedDescription)")
         }
     }
 }

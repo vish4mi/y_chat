@@ -16,6 +16,8 @@ struct ChatView: View {
     let conversationId: String
     @State private var showingGroupDetails = false
     @State private var newMemberSearch = ""
+    @State private var isFilePickerPresented = false
+    @State private var selectedFileURL: URL?
     
     // Computed properties
     private var navigationTitle: String {
@@ -64,10 +66,6 @@ struct ChatView: View {
         }
         .onAppear(perform: setupChat)
         .onDisappear(perform: chatViewModel.removeListeners)
-        .onChange(of: chatViewModel.messages) { _ in
-            print("*******Message Chnaged")
-//            chatViewModel.sc
-        }
     }
     
     // MARK: - Subviews
@@ -117,6 +115,23 @@ struct ChatView: View {
     
     private var messageInput: some View {
         HStack {
+            Button(action: {
+                isFilePickerPresented = true
+            }) {
+                Image(systemName: "paperclip") // Use a paperclip icon
+                    .font(.system(size: 20))
+                    .padding(8)
+                    .background(Color.gray.opacity(0.2))
+                    .clipShape(Circle())
+            }
+            .fileImporter(
+                isPresented: $isFilePickerPresented,
+                allowedContentTypes: [.image, .movie, .audio],
+                allowsMultipleSelection: false
+            ) { result in
+                handleFilePickerResult(result)
+            }
+            
             TextField("Type a message...", text: $messageText)
                 .textFieldStyle(.roundedBorder)
                 .onChange(of: messageText) { _ in
@@ -177,6 +192,18 @@ struct ChatView: View {
         return "typing..."
     }
     
+    // Handle file picker result
+    private func handleFilePickerResult(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let fileURLs):
+            if let fileURL = fileURLs.first {
+                selectedFileURL = fileURL
+                chatViewModel.uploadMedia(fileURL: fileURL)
+            }
+        case .failure(let error):
+            print("File picker error: \(error.localizedDescription)")
+        }
+    }
     // MARK: - Methods
     
     private func sendMessage() {

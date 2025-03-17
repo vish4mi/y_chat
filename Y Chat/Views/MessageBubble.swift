@@ -25,11 +25,18 @@ struct MessageBubble: View {
                         .foregroundColor(.gray)
                 }
                 
-                Text(message.text)
-                    .padding()
-                    .background(isFromCurrentUser ? Color.blue : Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(15)
+                // Display media or text message
+                if let mediaURL = message.mediaURL, let mediaType = message.mediaType {
+                    // Media message (image, video, audio)
+                    MediaMessageView(mediaURL: mediaURL, mediaType: mediaType)
+                } else {
+                    // Text message
+                    Text(message.text)
+                        .padding()
+                        .background(isFromCurrentUser ? Color.blue : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(15)
+                }
                 
                 HStack(alignment: .bottom, spacing: 4) {
                     Text(message.timestamp ?? Date(), style: .time)
