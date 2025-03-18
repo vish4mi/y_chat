@@ -17,7 +17,7 @@ struct ChatApp: App {
     init() {
         FirebaseApp.configure() // Firebase initialization
         // Create the AppDependencies object
-        appDependencies = AppDependencies()
+        appDependencies = AppDependencies(coreDataStack: coreDataStack)
         _authViewModel = StateObject(wrappedValue: AuthViewModel())
     }
     

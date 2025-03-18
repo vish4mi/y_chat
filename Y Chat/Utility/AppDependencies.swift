@@ -12,9 +12,9 @@ class AppDependencies: ObservableObject {
     let chatRepository: ChatRepository
     let authRepository: AuthRepository
     
-    init() {
+    init(coreDataStack: CoreDataStack) {
         // Create instances of services and repositories
-        self.chatRepository = ChatRepository(chatRequest: FirestoreChatRequest())
+        self.chatRepository = ChatRepository(chatRequest: FirestoreChatRequest(), persistentContainer: coreDataStack.persistentContainer)
         self.authRepository = AuthRepository(authRequest: FirebaseAuthRequest())
     }
 }

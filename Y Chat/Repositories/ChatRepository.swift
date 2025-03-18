@@ -7,19 +7,26 @@
 
 import Combine
 import Foundation
+import CoreData
 
 class ChatRepository {
     private let chatRequest: ChatRequestProtocol
     private let mediaRequest: MediaRequestProtocol
+    private let networkMonitor = NetworkMonitor.shared
     
-    private var cancellables = Set<AnyCancellable>()
+    let persistentContainer: NSPersistentContainer
+
+
+    var cancellables = Set<AnyCancellable>()
     
     init(
         chatRequest: ChatRequestProtocol = FirestoreChatRequest(),
-        mediaRequest: MediaRequestProtocol = FirebaseMediaRequest()
+        mediaRequest: MediaRequestProtocol = FirebaseMediaRequest(),
+        persistentContainer: NSPersistentContainer
     ) {
         self.chatRequest = chatRequest
         self.mediaRequest = mediaRequest
+        self.persistentContainer = persistentContainer
     }
     
     func fetchConversation(conversationId: String) -> AnyPublisher<Conversation?, Error> {

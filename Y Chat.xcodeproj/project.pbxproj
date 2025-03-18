@@ -56,6 +56,7 @@
 		C95CD0182D88B839007574B4 /* FirestoreChatRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0172D88B839007574B4 /* FirestoreChatRequest.swift */; };
 		C95CD01A2D88EECC007574B4 /* MediaRequestProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0192D88EECC007574B4 /* MediaRequestProtocol.swift */; };
 		C95CD01C2D88EF09007574B4 /* FirebaseMediaRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD01B2D88EF09007574B4 /* FirebaseMediaRequest.swift */; };
+		C95CD0222D898333007574B4 /* ChatRepository+Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0212D898333007574B4 /* ChatRepository+Storage.swift */; };
 		C99341BE2D7C45160036B3ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C99341BD2D7C45160036B3ED /* Assets.xcassets */; };
 		C99341C12D7C45160036B3ED /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C99341C02D7C45160036B3ED /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -106,6 +107,7 @@
 		C95CD0172D88B839007574B4 /* FirestoreChatRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreChatRequest.swift; sourceTree = "<group>"; };
 		C95CD0192D88EECC007574B4 /* MediaRequestProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRequestProtocol.swift; sourceTree = "<group>"; };
 		C95CD01B2D88EF09007574B4 /* FirebaseMediaRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseMediaRequest.swift; sourceTree = "<group>"; };
+		C95CD0212D898333007574B4 /* ChatRepository+Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatRepository+Storage.swift"; sourceTree = "<group>"; };
 		C99341B62D7C45130036B3ED /* Y Chat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Y Chat.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99341BD2D7C45160036B3ED /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C99341C02D7C45160036B3ED /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -223,6 +225,7 @@
 			children = (
 				C95CCFF12D88374A007574B4 /* ChatRepository.swift */,
 				C95CD00C2D88976C007574B4 /* AuthRepository.swift */,
+				C95CD0212D898333007574B4 /* ChatRepository+Storage.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -392,6 +395,7 @@
 				C95CD0142D88AFBC007574B4 /* FirestoreRequestProtocol.swift in Sources */,
 				C95CCFE42D881B6E007574B4 /* MediaType.swift in Sources */,
 				C95CD00D2D88976C007574B4 /* AuthRepository.swift in Sources */,
+				C95CD0222D898333007574B4 /* ChatRepository+Storage.swift in Sources */,
 				C95CCFBC2D84B25D007574B4 /* ConversationRow.swift in Sources */,
 				C95CD0122D88984F007574B4 /* AuthRequestProtocol.swift in Sources */,
 				C95CCFF82D883829007574B4 /* CoreDataManager.swift in Sources */,
