@@ -29,8 +29,8 @@ struct Message: Identifiable, Codable, Equatable {
         senderName: String,
         groupId: String,
         timestamp: Date = Date(),
-        mediaURL: String = "",
-        mediaType: MediaType = .image
+        mediaURL: String?,
+        mediaType: MediaType?
     ) {
         self.id = UUID().uuidString
         self.text = text
@@ -50,8 +50,8 @@ struct Message: Identifiable, Codable, Equatable {
         senderId: String,
         senderName: String,
         timestamp: Date = Date(),
-        mediaURL: String = "",
-        mediaType: MediaType = .image
+        mediaURL: String?,
+        mediaType: MediaType?
     ) {
         self.id = UUID().uuidString
         self.text = text

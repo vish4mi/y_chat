@@ -9,17 +9,22 @@ import SwiftUI
 import FirebaseFirestore
 
 struct ConversationsListView: View {
-    @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var appDependencies: AppDependencies
+    @StateObject var authViewModel: AuthViewModel
     @StateObject var viewModel = ConversationsViewModel()
     @State private var isShowingGroupChatCreator = false
 
     @State private var showNewChat = false  // Added for new chat flow
     
+    init(authViewModel: AuthViewModel) {
+        _authViewModel = StateObject(wrappedValue: authViewModel)
+    }
+    
     var body: some View {
         List(viewModel.conversations) { conversation in
             NavigationLink {
                 ChatView(
-                    conversationId: conversation.id ?? ""
+                    conversationId: conversation.id ?? "", authViewModel: authViewModel
                 )
             } label: {
                 ConversationRow(conversation: conversation)
@@ -57,14 +62,8 @@ struct ConversationsListView: View {
             NewGroupView() // Group chat creation view
         }
         .onAppear {
+            viewModel.chatRepository = appDependencies.chatRepository
             viewModel.fetchConversations()
         }
-    }
-}
-
-struct ConversationsListView_Previews: PreviewProvider {
-    static var previews: some View {
-        ConversationsListView()
-            .environmentObject(AuthViewModel())
     }
 }

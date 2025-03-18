@@ -40,6 +40,23 @@
 		C95CCFE82D882441007574B4 /* MediaMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CCFE72D882441007574B4 /* MediaMessageView.swift */; };
 		C95CCFEA2D88249E007574B4 /* AudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CCFE92D88249E007574B4 /* AudioPlayerView.swift */; };
 		C95CCFED2D882B8D007574B4 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CCFEC2D882B8D007574B4 /* Helper.swift */; };
+		C95CCFF22D88374A007574B4 /* ChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CCFF12D88374A007574B4 /* ChatRepository.swift */; };
+		C95CCFF62D8837A9007574B4 /* FirebaseFirestoreRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CCFF52D8837A9007574B4 /* FirebaseFirestoreRequest.swift */; };
+		C95CCFF82D883829007574B4 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CCFF72D883829007574B4 /* CoreDataManager.swift */; };
+		C95CCFFA2D88393C007574B4 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C95CCFF92D88393B007574B4 /* CoreData.framework */; };
+		C95CCFFD2D883975007574B4 /* ChatAppModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C95CCFFB2D883975007574B4 /* ChatAppModel.xcdatamodeld */; };
+		C95CD0072D883FD4007574B4 /* ParticipantsTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0062D883FD4007574B4 /* ParticipantsTransformer.swift */; };
+		C95CD0092D88462A007574B4 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0082D88462A007574B4 /* NetworkMonitor.swift */; };
+		C95CD00B2D88598B007574B4 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD00A2D88598B007574B4 /* AppDependencies.swift */; };
+		C95CD00D2D88976C007574B4 /* AuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD00C2D88976C007574B4 /* AuthRepository.swift */; };
+		C95CD00F2D8897D2007574B4 /* FirebaseAuthRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD00E2D8897D2007574B4 /* FirebaseAuthRequest.swift */; };
+		C95CD0122D88984F007574B4 /* AuthRequestProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0112D88984F007574B4 /* AuthRequestProtocol.swift */; };
+		C95CD0142D88AFBC007574B4 /* FirestoreRequestProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0132D88AFBC007574B4 /* FirestoreRequestProtocol.swift */; };
+		C95CD0162D88B7BA007574B4 /* ChatRequestProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0152D88B7BA007574B4 /* ChatRequestProtocol.swift */; };
+		C95CD0182D88B839007574B4 /* FirestoreChatRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0172D88B839007574B4 /* FirestoreChatRequest.swift */; };
+		C95CD01A2D88EECC007574B4 /* MediaRequestProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0192D88EECC007574B4 /* MediaRequestProtocol.swift */; };
+		C95CD01C2D88EF09007574B4 /* FirebaseMediaRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD01B2D88EF09007574B4 /* FirebaseMediaRequest.swift */; };
+		C95CD0222D898333007574B4 /* ChatRepository+Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95CD0212D898333007574B4 /* ChatRepository+Storage.swift */; };
 		C99341BE2D7C45160036B3ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C99341BD2D7C45160036B3ED /* Assets.xcassets */; };
 		C99341C12D7C45160036B3ED /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C99341C02D7C45160036B3ED /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -74,6 +91,23 @@
 		C95CCFE72D882441007574B4 /* MediaMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaMessageView.swift; sourceTree = "<group>"; };
 		C95CCFE92D88249E007574B4 /* AudioPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerView.swift; sourceTree = "<group>"; };
 		C95CCFEC2D882B8D007574B4 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
+		C95CCFF12D88374A007574B4 /* ChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRepository.swift; sourceTree = "<group>"; };
+		C95CCFF52D8837A9007574B4 /* FirebaseFirestoreRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseFirestoreRequest.swift; sourceTree = "<group>"; };
+		C95CCFF72D883829007574B4 /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
+		C95CCFF92D88393B007574B4 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		C95CCFFC2D883975007574B4 /* ChatAppModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ChatAppModel.xcdatamodel; sourceTree = "<group>"; };
+		C95CD0062D883FD4007574B4 /* ParticipantsTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsTransformer.swift; sourceTree = "<group>"; };
+		C95CD0082D88462A007574B4 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		C95CD00A2D88598B007574B4 /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
+		C95CD00C2D88976C007574B4 /* AuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRepository.swift; sourceTree = "<group>"; };
+		C95CD00E2D8897D2007574B4 /* FirebaseAuthRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthRequest.swift; sourceTree = "<group>"; };
+		C95CD0112D88984F007574B4 /* AuthRequestProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestProtocol.swift; sourceTree = "<group>"; };
+		C95CD0132D88AFBC007574B4 /* FirestoreRequestProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreRequestProtocol.swift; sourceTree = "<group>"; };
+		C95CD0152D88B7BA007574B4 /* ChatRequestProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRequestProtocol.swift; sourceTree = "<group>"; };
+		C95CD0172D88B839007574B4 /* FirestoreChatRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreChatRequest.swift; sourceTree = "<group>"; };
+		C95CD0192D88EECC007574B4 /* MediaRequestProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRequestProtocol.swift; sourceTree = "<group>"; };
+		C95CD01B2D88EF09007574B4 /* FirebaseMediaRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseMediaRequest.swift; sourceTree = "<group>"; };
+		C95CD0212D898333007574B4 /* ChatRepository+Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatRepository+Storage.swift"; sourceTree = "<group>"; };
 		C99341B62D7C45130036B3ED /* Y Chat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Y Chat.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99341BD2D7C45160036B3ED /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C99341C02D7C45160036B3ED /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -86,6 +120,7 @@
 			files = (
 				C95CCF9C2D81577B007574B4 /* FirebaseAuth in Frameworks */,
 				C95CCFE62D881E15007574B4 /* FirebaseStorage in Frameworks */,
+				C95CCFFA2D88393C007574B4 /* CoreData.framework in Frameworks */,
 				C95CCFB52D84ACD3007574B4 /* FirebaseFirestore in Frameworks */,
 				C95CCFC62D84BC2B007574B4 /* FirebaseFirestoreSwift in Frameworks */,
 			);
@@ -128,6 +163,8 @@
 			isa = PBXGroup;
 			children = (
 				C95CCFAF2D8185B4007574B4 /* CoreDataStack.swift */,
+				C95CCFF72D883829007574B4 /* CoreDataManager.swift */,
+				C95CD0062D883FD4007574B4 /* ParticipantsTransformer.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -135,6 +172,7 @@
 		C95CCFB32D84ACD3007574B4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C95CCFF92D88393B007574B4 /* CoreData.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -176,13 +214,49 @@
 			isa = PBXGroup;
 			children = (
 				C95CCFEC2D882B8D007574B4 /* Helper.swift */,
+				C95CD0082D88462A007574B4 /* NetworkMonitor.swift */,
+				C95CD00A2D88598B007574B4 /* AppDependencies.swift */,
 			);
 			path = Utility;
+			sourceTree = "<group>";
+		};
+		C95CCFEE2D883717007574B4 /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				C95CCFF12D88374A007574B4 /* ChatRepository.swift */,
+				C95CD00C2D88976C007574B4 /* AuthRepository.swift */,
+				C95CD0212D898333007574B4 /* ChatRepository+Storage.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		C95CCFEF2D883717007574B4 /* Requests */ = {
+			isa = PBXGroup;
+			children = (
+				C95CD0102D889831007574B4 /* RequestProtocols */,
+				C95CCFF52D8837A9007574B4 /* FirebaseFirestoreRequest.swift */,
+				C95CD00E2D8897D2007574B4 /* FirebaseAuthRequest.swift */,
+				C95CD0172D88B839007574B4 /* FirestoreChatRequest.swift */,
+				C95CD01B2D88EF09007574B4 /* FirebaseMediaRequest.swift */,
+			);
+			path = Requests;
+			sourceTree = "<group>";
+		};
+		C95CD0102D889831007574B4 /* RequestProtocols */ = {
+			isa = PBXGroup;
+			children = (
+				C95CD0112D88984F007574B4 /* AuthRequestProtocol.swift */,
+				C95CD0132D88AFBC007574B4 /* FirestoreRequestProtocol.swift */,
+				C95CD0152D88B7BA007574B4 /* ChatRequestProtocol.swift */,
+				C95CD0192D88EECC007574B4 /* MediaRequestProtocol.swift */,
+			);
+			path = RequestProtocols;
 			sourceTree = "<group>";
 		};
 		C99341AD2D7C45130036B3ED = {
 			isa = PBXGroup;
 			children = (
+				C95CCFFB2D883975007574B4 /* ChatAppModel.xcdatamodeld */,
 				C95CCFC72D84C0B9007574B4 /* GoogleService-Info.plist */,
 				C99341B82D7C45130036B3ED /* Y Chat */,
 				C99341B72D7C45130036B3ED /* Products */,
@@ -201,6 +275,8 @@
 		C99341B82D7C45130036B3ED /* Y Chat */ = {
 			isa = PBXGroup;
 			children = (
+				C95CCFEE2D883717007574B4 /* Repositories */,
+				C95CCFEF2D883717007574B4 /* Requests */,
 				C95CCFEB2D882B66007574B4 /* Utility */,
 				C95CCFB62D84B0B7007574B4 /* Models */,
 				C95CCFAE2D8185A4007574B4 /* Storage */,
@@ -301,17 +377,28 @@
 			buildActionMask = 2147483647;
 			files = (
 				C95CCFBE2D84B2AC007574B4 /* ConversationsViewModel.swift in Sources */,
+				C95CD0182D88B839007574B4 /* FirestoreChatRequest.swift in Sources */,
 				C95CCFD52D86EC2A007574B4 /* NewGroupView.swift in Sources */,
 				C95CCFD22D869EB3007574B4 /* MessageStatus.swift in Sources */,
+				C95CCFF62D8837A9007574B4 /* FirebaseFirestoreRequest.swift in Sources */,
+				C95CD00F2D8897D2007574B4 /* FirebaseAuthRequest.swift in Sources */,
 				C95CCFDE2D86EEF1007574B4 /* DotAnimationView.swift in Sources */,
+				C95CCFF22D88374A007574B4 /* ChatRepository.swift in Sources */,
 				C95CCFAB2D816A0D007574B4 /* AuthView.swift in Sources */,
+				C95CD0072D883FD4007574B4 /* ParticipantsTransformer.swift in Sources */,
 				C95CCFAD2D8180D8007574B4 /* ChatApp.swift in Sources */,
 				C95CCFCA2D84C8E0007574B4 /* NewChatView.swift in Sources */,
 				C95CCFBA2D84B1F8007574B4 /* ConversationsListView.swift in Sources */,
 				C95CCFC22D84B3CA007574B4 /* ChatView.swift in Sources */,
+				C95CCFFD2D883975007574B4 /* ChatAppModel.xcdatamodeld in Sources */,
 				C95CCFD02D868CEE007574B4 /* MessageStatusView.swift in Sources */,
+				C95CD0142D88AFBC007574B4 /* FirestoreRequestProtocol.swift in Sources */,
 				C95CCFE42D881B6E007574B4 /* MediaType.swift in Sources */,
+				C95CD00D2D88976C007574B4 /* AuthRepository.swift in Sources */,
+				C95CD0222D898333007574B4 /* ChatRepository+Storage.swift in Sources */,
 				C95CCFBC2D84B25D007574B4 /* ConversationRow.swift in Sources */,
+				C95CD0122D88984F007574B4 /* AuthRequestProtocol.swift in Sources */,
+				C95CCFF82D883829007574B4 /* CoreDataManager.swift in Sources */,
 				C95CCF992D8154B1007574B4 /* AuthViewModel.swift in Sources */,
 				C95CCFE02D873606007574B4 /* AddGroupMembersView.swift in Sources */,
 				C95CCFC42D84B463007574B4 /* MessageBubble.swift in Sources */,
@@ -319,11 +406,16 @@
 				C95CCFE22D87365B007574B4 /* AddGroupMembersViewModel.swift in Sources */,
 				C95CCFD82D86EC83007574B4 /* NewGroupViewModel.swift in Sources */,
 				C95CCFCE2D84C9D7007574B4 /* ChatUser.swift in Sources */,
+				C95CD00B2D88598B007574B4 /* AppDependencies.swift in Sources */,
 				C95CCFCC2D84C966007574B4 /* NewChatViewModel.swift in Sources */,
 				C95CCFB82D84B0D1007574B4 /* Message.swift in Sources */,
 				C95CCFB22D81885D007574B4 /* ChatViewModel.swift in Sources */,
+				C95CD0092D88462A007574B4 /* NetworkMonitor.swift in Sources */,
 				C95CCFE82D882441007574B4 /* MediaMessageView.swift in Sources */,
+				C95CD0162D88B7BA007574B4 /* ChatRequestProtocol.swift in Sources */,
+				C95CD01A2D88EECC007574B4 /* MediaRequestProtocol.swift in Sources */,
 				C95CCFC02D84B2ED007574B4 /* Conversation.swift in Sources */,
+				C95CD01C2D88EF09007574B4 /* FirebaseMediaRequest.swift in Sources */,
 				C95CCFEA2D88249E007574B4 /* AudioPlayerView.swift in Sources */,
 				C95CCFB02D8185B4007574B4 /* CoreDataStack.swift in Sources */,
 				C95CCFDC2D86EEC8007574B4 /* GroupTypingIndicator.swift in Sources */,
@@ -562,6 +654,19 @@
 			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		C95CCFFB2D883975007574B4 /* ChatAppModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				C95CCFFC2D883975007574B4 /* ChatAppModel.xcdatamodel */,
+			);
+			currentVersion = C95CCFFC2D883975007574B4 /* ChatAppModel.xcdatamodel */;
+			path = ChatAppModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = C99341AE2D7C45130036B3ED /* Project object */;
 }

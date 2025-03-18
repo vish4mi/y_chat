@@ -10,14 +10,16 @@ import FirebaseFirestore
 import FirebaseAuth
 
 struct ChatView: View {
-    @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var appDependencies: AppDependencies
+    @StateObject var authViewModel: AuthViewModel // Consider removing if possible
+    @StateObject private var chatViewModel: ChatViewModel
     @State private var messageText = ""
-    @StateObject var chatViewModel: ChatViewModel
-    let conversationId: String
     @State private var showingGroupDetails = false
     @State private var newMemberSearch = ""
     @State private var isFilePickerPresented = false
     @State private var selectedFileURL: URL?
+    
+    let conversationId: String
     
     // Computed properties
     private var navigationTitle: String {
@@ -32,15 +34,14 @@ struct ChatView: View {
     }
     
     // Initialization
-    init(conversationId: String) {
+    init(conversationId: String, authViewModel: AuthViewModel) {
         self.conversationId = conversationId
-        let currentUserId = Auth.auth().currentUser?.uid ?? ""
-        self._chatViewModel = StateObject(
-            wrappedValue: ChatViewModel(
-                conversationId: conversationId,
-                currentUserId: currentUserId
-            )
-        )
+        _authViewModel = StateObject(wrappedValue: authViewModel)
+        _chatViewModel = StateObject(wrappedValue: ChatViewModel(
+            conversationId: conversationId,
+            currentUserId: authViewModel.currentUserId ?? "",
+            authViewModel: authViewModel
+        ))
     }
     
     var body: some View {
@@ -57,7 +58,6 @@ struct ChatView: View {
             messageInput
         }
         .navigationTitle(navigationTitle)
-        .environmentObject(authViewModel)
         .toolbar { toolbarContent }
         .sheet(isPresented: $showingGroupDetails) {
             if let conversation = chatViewModel.conversation {
@@ -135,7 +135,7 @@ struct ChatView: View {
             TextField("Type a message...", text: $messageText)
                 .textFieldStyle(.roundedBorder)
                 .onChange(of: messageText) { _ in
-                    chatViewModel.handleTyping(isTyping: !messageText.isEmpty)
+                    chatViewModel.handleTyping(isTyping: !messageText.isEmpty, conversationId: conversationId)
                 }
             
             Button(action: sendMessage) {
@@ -210,7 +210,7 @@ struct ChatView: View {
         guard !messageText.isEmpty else { return }
         chatViewModel.sendMessage(messageText)
         messageText = ""
-        chatViewModel.handleTyping(isTyping: false)
+        chatViewModel.handleTyping(isTyping: false, conversationId: conversationId)
     }
     
     private func scrollToBottom(proxy: ScrollViewProxy) {
@@ -221,8 +221,10 @@ struct ChatView: View {
     }
     
     private func setupChat() {
+        chatViewModel.chatRepository = appDependencies.chatRepository
         chatViewModel.listenForMessages()
-        chatViewModel.fetchMessages(conversationId: conversationId)
+        chatViewModel.fetchConversation()
+        chatViewModel.fetchMessages()
         chatViewModel.observeTyping()
     }
 }
