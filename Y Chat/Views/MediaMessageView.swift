@@ -36,6 +36,9 @@ struct MediaMessageView: View {
                     .cornerRadius(10)
             case .audio:
                 AudioPlayerView(url: mediaURL)
+            default:
+                Text("Failed to load media file")
+                    .foregroundColor(.red)
             }
         }
     }

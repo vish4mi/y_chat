@@ -27,10 +27,10 @@ struct MessageStatusView: View {
             case .read:
                 Image(systemName: "checkmark")
                     .symbolRenderingMode(.monochrome)
-                    .foregroundColor(.green)
+                    .foregroundColor(.blue)
                 Image(systemName: "checkmark")
                     .symbolRenderingMode(.monochrome)
-                    .foregroundColor(.green)
+                    .foregroundColor(.blue)
             }
         }
         .font(.system(size: 10))

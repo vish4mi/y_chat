@@ -5,208 +5,198 @@
 //  Created by Vishal on 12/03/25.
 //
 
-import FirebaseFirestore
-import FirebaseAuth
 import Combine
 import SwiftUI
 import FirebaseStorage
 
 class ChatViewModel: ObservableObject {
-    @EnvironmentObject var authViewModel: AuthViewModel
+    @StateObject var authViewModel: AuthViewModel
     @Published var messages: [Message] = []
     var currentUserId: String
-    private var listener: ListenerRegistration?
     private let conversationId: String
-    @Published var isTyping = false // 👈 Add this
+    @Published var isTyping = false
     @Published var isGroupChat = false
     @Published var typingUserNames: [String] = []
     @Published var conversation: Conversation?
     
-    init(conversationId: String, currentUserId: String) {
+    var chatRepository: ChatRepository?
+    private var cancellables = Set<AnyCancellable>()
+
+    init(conversationId: String, currentUserId: String, authViewModel: AuthViewModel) {
+        _authViewModel = StateObject(wrappedValue: authViewModel)
         self.conversationId = conversationId
         self.currentUserId = currentUserId
-        self.fetchConversation()
     }
     
     func fetchConversation() {
-        Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .addSnapshotListener { [weak self] snapshot, _ in
-                self?.conversation = try? snapshot?.data(as: Conversation.self)
+        chatRepository?.fetchConversation(conversationId: conversationId)
+            .sink { completion in
+                switch completion {
+                case .finished: break
+                case .failure(let error):
+                    print("Error fetching conversation: \(error.localizedDescription)")
+                }
+            } receiveValue: { [weak self] conversation in
+                self?.conversation = conversation
             }
+            .store(in: &cancellables)
     }
     
-    func fetchMessages(conversationId: String) {
-        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-        
-        listener = Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .collection("messages")
-            .order(by: "timestamp")
-            .addSnapshotListener { [weak self] snapshot, _ in
-                guard let documents = snapshot?.documents else { return }
+    func fetchMessages() {
+        chatRepository?.fetchMessages(conversationId: conversationId)
+            .receive(on: RunLoop.main)
+            .sink { completion in
+                switch completion {
+                case .failure(_): break
+                case .finished: break
+                }
+            } receiveValue: { [weak self] messages in
+                guard let self = self else { return }
                 
-                var updatedMessages: [Message] = []
-                
-                for document in documents {
-                    if var message = try? document.data(as: Message.self) {
-                        // Mark as delivered if the message is sent by someone else
-                        if message.senderId != currentUserId && message.status == .sent {
-                            self?.markMessageAsDelivered(messageId: document.documentID, conversationId: conversationId)
-                            message.status = .delivered
+                // Update message statuses
+                let updatedMessages = messages.map { message in
+                    var updatedMessage = message
+                    if message.senderId != self.currentUserId {
+                        if message.status == .delivered || message.status == .sent {
+                            self.markMessageAsRead(messageId: message.id, conversationId: self.conversationId)
+                            updatedMessage.status = .read
                         }
-                        if message.senderId != currentUserId && message.status == .delivered {
-                            self?.markAllMessagesAsRead(conversationId: conversationId)
-                            message.status = .read
-                        }
-                        
-                        updatedMessages.append(message)
                     }
+                    return updatedMessage
                 }
                 
-                self?.messages = updatedMessages
+                self.messages = updatedMessages
             }
+            .store(in: &cancellables)
     }
+
     
     func sendMessage(_ text: String) {
         if conversation?.isGroup == true {
-            sendGroupMessage(text)
+            sendGroupMessage(text, conversationId: conversationId)
         } else {
-            sendDirectMessage(text)
+            sendDirectMessage(text, conversationId: conversationId)
         }
     }
-
-    private func sendDirectMessage(_ text: String) {
+    
+    func sendDirectMessage(_ text: String, conversationId: String) {
+        guard let chatRepository = chatRepository else {
+            print("Chat repository is missing.")
+            return
+        }
+        
         let message = Message(
             text: text,
             senderId: currentUserId,
             senderName: getSenderName(),
-            timestamp: Date()
+            timestamp: Date(),
+            mediaURL: nil,
+            mediaType: nil
         )
         
-        do {
-            try Firestore.firestore()
-                .collection("conversations")
-                .document(conversationId)
-                .collection("messages")
-                .document(message.id)
-                .setData(from: message)
-            
-            messages.append(message)
-            messages.sort {
-                $0.timestamp! < $1.timestamp!
+        chatRepository.sendDirectMessage(message: message, conversationId: conversationId)
+            .flatMap { _ -> AnyPublisher<Void, Error> in
+                return chatRepository.updateLastMessage(message: message, conversationId: conversationId)
             }
-            updateLastDirectMessage(message: message)
-        } catch {
-            print("Error sending message: \(error)")
-        }
+            .receive(on: RunLoop.main)
+            .sink { completion in
+                switch completion {
+                case .failure(_): break
+                case .finished: break
+                }
+            } receiveValue: { [weak self] _ in
+                self?.messages.append(message)
+                self?.messages.sort { $0.timestamp ?? Date.distantFuture < $1.timestamp ?? Date.distantFuture }
+            }
+            .store(in: &cancellables)
     }
     
-    func sendGroupMessage(_ text: String) {        
+    func sendGroupMessage(_ text: String, conversationId: String) {
+        guard let chatRepository = chatRepository else {
+            print("Chat repository is missing.")
+            return
+        }
+        
         let message = Message(
             text: text,
             senderId: currentUserId,
-            senderName: getSenderName(),  // Implement this
-            groupId: conversationId
+            senderName: getSenderName(),
+            groupId: conversationId,
+            mediaURL: nil,
+            mediaType: nil
         )
-        
-        do {
-            try Firestore.firestore()
-                .collection("conversations")
-                .document(conversationId)
-                .collection("messages")
-                .document(message.id)
-                .setData(from: message)
-            
-            messages.append(message)
-            messages.sort { ($0.timestamp ?? Date.distantFuture) > ($1.timestamp ?? Date.distantFuture) }
-
-            // Update conversation last message
-            updateLastGroupMessage(message: message)
-        } catch {
-            print("Error sending group message: \(error)")
-        }
+                
+        chatRepository.sendGroupMessage(message: message, conversationId: conversationId)
+            .flatMap { _ -> AnyPublisher<Void, Error> in
+                return chatRepository.updateLastMessage(message: message, conversationId: conversationId)
+            }
+            .receive(on: RunLoop.main)
+            .sink { completion in
+                switch completion {
+                case .failure(_): break
+                case .finished: break
+                }
+            } receiveValue: { [weak self] _ in
+                self?.messages.append(message)
+                self?.messages.sort { ($0.timestamp ?? Date.distantFuture) > ($1.timestamp ?? Date.distantFuture) }
+            }
+            .store(in: &cancellables)
     }
     
     private func getSenderName() -> String {
-        Auth.auth().currentUser?.displayName ?? "Unknown User"
-    }
-    
-    private func updateLastGroupMessage(message: Message) {
-        Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .updateData([
-                "lastMessage": message.text,
-                "lastMessageSenderId": message.senderId,
-                "lastMessageSenderName": message.senderName,
-                "timestamp": FieldValue.serverTimestamp()
-            ])
+        authViewModel.currentUser?.username ?? "Unknown User"
     }
     
     func updateTypingStatus(isTyping: Bool, conversationId: String) {
-        Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .updateData(["isTyping.\(currentUserId)": isTyping])
+        chatRepository?.updateTypingStatus(isTyping: isTyping, conversationId: conversationId, currentUserId: currentUserId)
+            .sink { completion in
+                switch completion {
+                case .failure(_):
+                    break
+                case .finished:
+                    break
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
+    }
+    
+    func handleTyping(isTyping: Bool, conversationId: String) {
+        chatRepository?.updateTypingStatus(isTyping: isTyping, conversationId: conversationId, currentUserId: currentUserId)
+            .sink { completion in
+                switch completion {
+                case .failure(_):
+                    break
+                case .finished:
+                    break
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
+    }
+    
+    func observeTyping() {
+        chatRepository?.observeTyping(conversationId: conversationId, currentUserId: currentUserId)
+            .receive(on: RunLoop.main)
+            .sink { completion in
+                switch completion {
+                case .failure(_):
+                    break
+                case .finished:
+                    break
+                }
+            } receiveValue: { [weak self] typingUsers in
+                guard let self = self else { return }
+                
+                // Map typing user IDs to names (if needed)
+                self.typingUserNames = typingUsers // Replace with actual logic to map IDs to names
+                self.isTyping = !typingUsers.isEmpty
+            }
+            .store(in: &cancellables)
     }
     
     func removeListeners() {
-        listener?.remove()
+        chatRepository?.removeListeners()
     }
     
-    func handleTyping(isTyping: Bool) {
-        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-        
-        let typingRef = Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .collection("typing")
-            .document(currentUserId)
-        
-        if isTyping {
-            typingRef.setData([
-                "isTyping": true,
-                "timestamp": FieldValue.serverTimestamp(),
-                "userId": currentUserId
-            ])
-        } else {
-            typingRef.delete()
-        }
-    }
-
-    // In ChatViewModel
-    func observeTyping() {
-        Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .collection("typing")
-            .addSnapshotListener { [weak self] snapshot, _ in
-                guard let self else { return }
-                
-                let typingUsers = snapshot?.documents
-                    .compactMap { [weak self] doc -> String? in
-                        guard doc["isTyping"] as? Bool == true,
-                              let userId = doc["userId"] as? String,
-                              userId != self?.currentUserId
-                        else { return nil }
-                        return userId
-                    } ?? []
-                
-                self.typingUserNames = self.conversation?.participantNames
-                    .filter { name in
-                        typingUsers.contains { userId in
-                            self.conversation?.participants.firstIndex(of: userId) ==
-                            self.conversation?.participantNames.firstIndex(of: name)
-                        }
-                    } ?? []
-                
-                self.isTyping = !typingUsers.isEmpty
-            }
-    }
-
     private func updateTypingIndicator(typingUsers: [String]) {
         if !typingUsers.isEmpty {
             // For 1:1 chat
@@ -223,131 +213,99 @@ class ChatViewModel: ObservableObject {
         }
     }
     
-    private func updateLastDirectMessage(message: Message) {
-        let updateData: [String: Any] = [
-            "lastMessage": message.text,
-            "lastMessageSenderId": message.senderId,
-            "lastMessageSenderName": message.senderName,
-            "timestamp": FieldValue.serverTimestamp()
-        ]
-        
-        Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .updateData(updateData) { error in
-                if let error = error {
-                    print("Error updating last message: \(error.localizedDescription)")
-                } else {
-                    print("Last message updated successfully")
-                }
-            }
-    }
-    
     func listenForMessages() {
-        listener = Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .collection("messages")
-            .addSnapshotListener { snapshot, error in
-                if let error = error {
-                    print("Error listening for messages: \(error.localizedDescription)")
-                    return
+        chatRepository?.listenForMessages(conversationId: conversationId)
+            .receive(on: RunLoop.main)
+            .sink { completion in
+                switch completion {
+                case .failure(_):
+                    break
+                case .finished:
+                    break
                 }
-                
-                guard let docs = snapshot?.documents else { return }
-                self.messages = docs.compactMap { doc in
-                    try? doc.data(as: Message.self)
-                }
-            }
-    }
-    
-    func markMessageAsDelivered(messageId: String, conversationId: String) {
-        let messageRef = Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .collection("messages")
-            .document(messageId)
-        
-        messageRef.updateData(["status": "delivered"]) { error in
-            if let error = error {
-                print("Error updating message status: \(error.localizedDescription)")
-            } else {
-                print("Message marked as delivered!")
-            }
-        }
-    }
-    
-    func markAllMessagesAsRead(conversationId: String) {
-        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-        
-        for message in messages {
-            // Mark as read if:
-            // 1. The message was sent by someone else.
-            // 2. The message status is "delivered".
-            if message.senderId != currentUserId && (message.status == .delivered || message.status == .sent) {
-                markMessageAsRead(messageId: message.id, conversationId: conversationId)
-            }
-        }
-    }
-    
-    func markMessageAsRead(messageId: String, conversationId: String) {
-        let messageRef = Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .collection("messages")
-            .document(messageId)
-        
-        messageRef.updateData(["status": "read"]) { error in
-            if let error = error {
-                print("Error updating message status: \(error.localizedDescription)")
-            } else {
-                print("Message marked as read!")
-            }
-        }
-    }
-    
-    func uploadMedia(fileURL: URL) {
-        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-        
-        // Generate a unique file name
-        let fileName = "\(UUID().uuidString)_\(fileURL.lastPathComponent)"
-        
-        // Create a reference to the file in Firebase Storage
-        let storageRef = Storage.storage().reference().child("media/\(currentUserId)/\(fileName)")
-        
-        // Upload the file
-        storageRef.putFile(from: fileURL, metadata: nil) { metadata, error in
-            if let error = error {
-                print("Error uploading file: \(error.localizedDescription)")
-                return
-            }
-            
-            // Get the download URL
-            storageRef.downloadURL { [weak self] url, error in
-                if let error = error {
-                    print("Error getting download URL: \(error.localizedDescription)")
-                    return
-                }
-                
-                if let downloadURL = url {
-                    if let mediaType = getMediaType(fileURL: downloadURL) {
-                        // Send the media message with the download URL
-                        self?.sendMediaMessage(mediaURL: downloadURL.absoluteString, mediaType: mediaType)
+            } receiveValue: { [weak self] messages in
+                self?.messages = messages
+                for message in messages {
+                    if let conversationId = self?.conversationId {
+                        self?.markMessageAsRead(messageId: message.id, conversationId: conversationId)
                     }
                 }
             }
-        }
+            .store(in: &cancellables)
     }
     
-    func sendMediaMessage(mediaURL: String, mediaType: MediaType) {
-        guard let currentUserId = Auth.auth().currentUser?.uid,
-        let currentUserName = Auth.auth().currentUser?.displayName
-        else { return }
-        
+    func markMessageAsDelivered(messageId: String, conversationId: String) {
+        chatRepository?.markMessageAsDelivered(messageId: messageId, conversationId: conversationId)
+            .sink { completion in
+                switch completion {
+                case .failure(_):
+                    break
+                case .finished:
+                    break
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
+    }
+    
+    func markMessageAsRead(messageId: String, conversationId: String) {
+        chatRepository?.markMessageAsRead(messageId: messageId, conversationId: conversationId)
+            .sink { completion in
+                switch completion {
+                case .failure(_):
+                    break
+                case .finished:
+                    break
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
+    }
+    
+    func markAllMessagesAsRead(conversationId: String) {
+        chatRepository?.markAllMessagesAsRead(conversationId: conversationId, currentUserId: currentUserId)
+            .sink { completion in
+                switch completion {
+                case .failure(_):
+                    break
+                case .finished:
+                    break
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
+    }
+    
+    func uploadMedia(fileURL: URL) {
+        chatRepository?.uploadMedia(fileURL: fileURL, userId: currentUserId)
+            .receive(on: RunLoop.main)
+            .sink { completion in
+                switch completion {
+                case .failure(_):
+                    break
+                case .finished:
+                    break
+                }
+            } receiveValue: { [weak self] downloadURL in
+                guard let self = self,
+                      let mediaType = getMediaType(fileURL: downloadURL)
+                else { return }
+                
+                // Determine the media type
+                
+                
+                // Send the media message
+                self.sendMediaMessage(
+                    mediaURL: downloadURL.absoluteString,
+                    mediaType: mediaType,
+                    conversationId: self.conversationId
+                )
+            }
+            .store(in: &cancellables)
+    }
+    
+    func sendMediaMessage(mediaURL: String, mediaType: MediaType, conversationId: String) {
         let newMessage = Message(
             text: "", // Optional: Add a caption
             senderId: currentUserId,
-            senderName: currentUserName,
+            senderName: getSenderName(),
             timestamp: Date(),
             mediaURL: mediaURL,
             mediaType: mediaType
@@ -357,24 +315,19 @@ class ChatViewModel: ObservableObject {
         messages.append(newMessage)
         
         // Send the message to Firestore
-        let messageRef = Firestore.firestore()
-            .collection("conversations")
-            .document(conversationId)
-            .collection("messages")
-            .document(newMessage.id)
-        
-        do {
-            try messageRef.setData(from: newMessage) { error in
-                if let error = error {
-                    print("Error sending message: \(error.localizedDescription)")
+        chatRepository?.sendMediaMessage(message: newMessage, conversationId: conversationId)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .failure(_):
                     // Remove the message from local state if Firestore fails
-                    self.messages.removeAll { $0.id == newMessage.id }
-                } else {
-                    print("Media message sent successfully!")
+                    self?.messages.removeAll { $0.id == newMessage.id }
+                case .finished:
+                    break
                 }
+            } receiveValue: { _ in
+                print("Media message sent successfully!")
             }
-        } catch {
-            print("Error encoding message: \(error.localizedDescription)")
-        }
+            .store(in: &cancellables)
     }
 }

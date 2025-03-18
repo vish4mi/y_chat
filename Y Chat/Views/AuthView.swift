@@ -8,12 +8,17 @@
 import SwiftUI
 
 struct AuthView: View {
-    @EnvironmentObject var viewModel: AuthViewModel
-    @State private var username = ""
-    @State private var email = ""
-    @State private var password = ""
-    @State private var isLoginMode = true
+    @StateObject private var viewModel: AuthViewModel
     
+    init(viewModel: AuthViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+    
+    @State private var email: String = ""
+    @State private var password: String = ""
+    @State private var username: String = ""
+    @State private var isLoginMode = true
+
     var body: some View {
         VStack(spacing: 20) {
             Picker("Auth Mode", selection: $isLoginMode) {

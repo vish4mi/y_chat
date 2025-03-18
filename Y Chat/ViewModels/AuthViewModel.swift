@@ -16,91 +16,76 @@ class AuthViewModel: ObservableObject {
     @Published var errorMessage = ""
     @Published var currentUserId: String?
     @Published var currentUser: ChatUser?
-
+    
     private var cancellables = Set<AnyCancellable>()
+    var authRepository: AuthRepository?
     
-    init() {
-        setupAuthListener()
-    }
+    init() {}
     
-    private func setupAuthListener() {
-        Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            self?.isAuthenticated = user != nil
-            self?.currentUserId = user?.uid // Update current user ID
-        }
+    func setupAuthListener() {
+        authRepository?.authStateListener()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] user in
+                self?.isAuthenticated = user.uid.count > 0 ? true : false
+                self?.currentUserId = user.uid
+                self?.currentUser = user
+            }
+            .store(in: &cancellables)
     }
     
     func login(email: String, password: String) {
         isLoading = true
-        Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
-            self?.isLoading = false
-            if let error = error {
-                self?.errorMessage = error.localizedDescription
-                self?.showError = true
+        authRepository?.signIn(email: email, password: password)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] completion in
+                self?.isLoading = false
+                switch completion {
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
+                    self?.showError = true
+                case .finished:
+                    break
+                }
+            } receiveValue: { [weak self] chatUser in
+                self?.currentUser = chatUser
+                self?.currentUserId = chatUser.uid
             }
-        }
+            .store(in: &cancellables)
     }
     
     func signUp(email: String, password: String, username: String) {
         isLoading = true
-        Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
-            self?.isLoading = false
-            
-            if let error = error {
-                self?.errorMessage = error.localizedDescription
-                self?.showError = true
-                return
-            }
-            
-            guard let user = result?.user else { return }
-            
-            // Update the user's profile with the display name
-            let changeRequest = user.createProfileChangeRequest()
-            changeRequest.displayName = username
-            changeRequest.commitChanges { error in
-                if let error = error {
-                    print("Error updating profile: \(error.localizedDescription)")
-                } else {
-                    print("Display name set successfully!")
+        authRepository?.signUp(email: email, password: password, username: username)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] completion in
+                self?.isLoading = false
+                switch completion {
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
+                    self?.showError = true
+                case .finished:
+                    break
                 }
+            } receiveValue: { [weak self] chatUser in
+                self?.currentUser = chatUser
+                self?.currentUserId = chatUser.uid
             }
-            
-            let userData = ChatUser(
-                email: email.lowercased(),
-                uid: user.uid,
-                username: username
-            )
-            // Save to Firestore with error handling
-            do {
-                try Firestore.firestore()
-                    .collection("users")
-                    .document(user.uid)
-                    .setData(from: userData)
-            } catch let encodeError {
-                self?.errorMessage = "Failed to save user: \(encodeError.localizedDescription)"
-                self?.showError = true
-            }
-            do {
-                try Firestore.firestore()
-                    .collection("users") // Ensure collection name matches
-                    .document(user.uid)
-                    .setData(from: userData)
-                print("✅ User saved to Firestore!")
-            } catch let encodeError {
-                print("❌ Firestore save error: \(String(describing: error?.localizedDescription))")
-                self?.errorMessage = "Failed to save user: \(encodeError.localizedDescription)"
-                self?.showError = true
-            }
-        }
+            .store(in: &cancellables)
     }
     
     func signOut() {
-        do {
-            try Auth.auth().signOut()
-            currentUserId = nil // Clear on sign out
-        } catch {
-            errorMessage = error.localizedDescription
-            showError = true
-        }
+        authRepository?.signOut()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
+                    self?.showError = true
+                case .finished:
+                    self?.currentUserId = nil
+                    self?.currentUser = nil
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
     }
 }

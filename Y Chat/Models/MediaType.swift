@@ -11,4 +11,5 @@ enum MediaType: String, Codable {
     case image
     case video
     case audio
+    case other
 }

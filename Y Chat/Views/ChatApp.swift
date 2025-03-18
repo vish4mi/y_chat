@@ -10,11 +10,15 @@ import Firebase
 
 @main
 struct ChatApp: App {
-    @StateObject var authViewModel = AuthViewModel()
+    @StateObject var authViewModel: AuthViewModel
     var coreDataStack = CoreDataStack.shared
+    let appDependencies: AppDependencies
     
     init() {
         FirebaseApp.configure() // Firebase initialization
+        // Create the AppDependencies object
+        appDependencies = AppDependencies()
+        _authViewModel = StateObject(wrappedValue: AuthViewModel())
     }
     
     var body: some Scene {
@@ -22,15 +26,18 @@ struct ChatApp: App {
             NavigationView {
                 Group {
                     if authViewModel.isAuthenticated {
-                        ConversationsListView()
+                        ConversationsListView(authViewModel: authViewModel)
                     } else {
-                        AuthView()
+                        AuthView(viewModel: authViewModel)
                     }
                 }
-                .environment(\.managedObjectContext, coreDataStack.context)
             }
-            .environmentObject(authViewModel)
+            .environmentObject(appDependencies)
             .navigationViewStyle(.stack)
+            .onAppear {
+                authViewModel.authRepository = appDependencies.authRepository
+                authViewModel.setupAuthListener()
+            }
         }
     }
 }
