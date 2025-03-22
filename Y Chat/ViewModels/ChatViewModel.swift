@@ -10,7 +10,7 @@ import SwiftUI
 import FirebaseStorage
 
 class ChatViewModel: ObservableObject {
-    @StateObject var authViewModel: AuthViewModel
+    var authViewModel: AuthViewModel
     @Published var messages: [Message] = []
     var currentUserId: String
     private let conversationId: String
@@ -23,7 +23,7 @@ class ChatViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init(conversationId: String, currentUserId: String, authViewModel: AuthViewModel) {
-        _authViewModel = StateObject(wrappedValue: authViewModel)
+        self.authViewModel = authViewModel
         self.conversationId = conversationId
         self.currentUserId = currentUserId
     }
@@ -226,8 +226,10 @@ class ChatViewModel: ObservableObject {
             } receiveValue: { [weak self] messages in
                 self?.messages = messages
                 for message in messages {
-                    if let conversationId = self?.conversationId {
-                        self?.markMessageAsRead(messageId: message.id, conversationId: conversationId)
+                    if let conversationId = self?.conversationId, let currentUserId = self?.authViewModel.currentUserId {
+                        if message.senderId != currentUserId {
+                            self?.markMessageAsRead(messageId: message.id, conversationId: conversationId)
+                        }
                     }
                 }
             }

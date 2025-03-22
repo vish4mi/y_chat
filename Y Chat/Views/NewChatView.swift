@@ -9,10 +9,16 @@ import SwiftUI
 import FirebaseFirestore
 
 struct NewChatView: View {
-    @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var appDependencies: AppDependencies
+    @StateObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) var dismiss
-    @StateObject var vm = NewChatViewModel()
+    @StateObject var newChatViewModel: NewChatViewModel
     @State private var searchQuery = ""
+    
+    init(authViewModel: AuthViewModel, isPresented: Binding<Bool>) {
+        _authViewModel = StateObject(wrappedValue: authViewModel)
+        _newChatViewModel = StateObject(wrappedValue: NewChatViewModel(authViewModel: authViewModel, isPresented: isPresented))
+    }
     
     var body: some View {
         NavigationStack {
@@ -24,18 +30,17 @@ struct NewChatView: View {
                     .padding(.horizontal)
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
-                    .onChange(of: searchQuery) { vm.searchUsers(query: $0) }
+                    .onChange(of: searchQuery) { newChatViewModel.searchUsers(query: $0) }
                 
-                if vm.isSearching {
+                if newChatViewModel.isSearching {
                     ProgressView()
-                } else if let error = vm.error {
+                } else if let error = newChatViewModel.error {
                     Text(error)
                         .foregroundColor(.red)
                 } else {
-                    List(vm.searchResults) { user in
+                    List(newChatViewModel.searchResults) { user in
                         Button {
-                            vm.startChat(with: user)
-                            dismiss()
+                            newChatViewModel.startChat(with: user)
                         } label: {
                             Text(user.email)
                         }

@@ -46,6 +46,10 @@ struct ChatView: View {
     
     var body: some View {
         VStack {
+            Text("Welcome, \(authViewModel.currentUser?.username ?? "Guest")!")
+                .font(.headline)
+                .padding()
+            
             // Group header
             if shouldShowGroupHeader {
                 groupHeader
@@ -58,6 +62,7 @@ struct ChatView: View {
             messageInput
         }
         .navigationTitle(navigationTitle)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
         .sheet(isPresented: $showingGroupDetails) {
             if let conversation = chatViewModel.conversation {

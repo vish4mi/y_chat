@@ -8,16 +8,24 @@
 import Firebase
 import FirebaseFirestore
 import FirebaseFirestoreSwift
+import SwiftUI
 
 class NewChatViewModel: ObservableObject {
     @Published var searchResults: [ChatUser] = []
     @Published var error: String?
     @Published var isSearching = false
-    
+    var authViewModel: AuthViewModel
+    @Binding var isPresented: Bool
+
     private let db = Firestore.firestore()
     
+    init(authViewModel: AuthViewModel, isPresented: Binding<Bool>) {
+        self.authViewModel = authViewModel
+        self._isPresented = isPresented
+    }
+    
     func searchUsers(query: String) {
-        guard !query.isEmpty else {
+        guard !query.isEmpty, let currentUserEmail = authViewModel.currentUser?.email else {
             searchResults = []
             return
         }
@@ -27,6 +35,7 @@ class NewChatViewModel: ObservableObject {
         
         db.collection("users")
             .whereField("email", isEqualTo: query.lowercased())
+            .whereField("email", isNotEqualTo: currentUserEmail)
             .getDocuments { [weak self] snapshot, error in
                 self?.isSearching = false
                 
@@ -51,19 +60,19 @@ class NewChatViewModel: ObservableObject {
             let currentUserID = Auth.auth().currentUser?.uid,
             let currentUserName = Auth.auth().currentUser?.displayName ?? Auth.auth().currentUser?.email // Fallback to email if name unavailable
         else { return }
-
+        
         guard let userID = user.id else {
             print("Error: User ID is nil")
             return
         }
-
+        
         let participants = [currentUserID, userID].sorted()
         let participantNames = [currentUserName, user.username].sorted() // Assuming ChatUser has a `name` property
-
+        
         let conversationRef = Firestore.firestore()
             .collection("conversations")
             .document(participants.joined(separator: "_"))
-
+        
         conversationRef.setData([
             "participants": participants,
             "participantNames": participantNames, // Changed from participantEmails
@@ -74,9 +83,10 @@ class NewChatViewModel: ObservableObject {
         ]) { error in
             if let error = error {
                 print("Failed to create conversation: \(error.localizedDescription)")
+                self.isPresented = false
             } else {
                 print("Conversation created successfully!")
-                // Handle navigation
+                self.isPresented = false
             }
         }
     }

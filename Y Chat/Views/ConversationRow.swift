@@ -46,7 +46,7 @@ struct ConversationRow: View {
             
             // Message status and timestamp
 //            MessageStatusView(status: conversation.lastMessageStatus ?? .sent)
-            Text(conversation.timestamp?.formatted(date: .omitted, time: .shortened) ?? "Unknown Time")
+            Text(conversation.timestamp?.formatted(date: .omitted, time: .shortened) ?? "")
                 .font(.caption)
                 .foregroundColor(.gray)
         }

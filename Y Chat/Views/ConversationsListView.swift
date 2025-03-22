@@ -13,7 +13,6 @@ struct ConversationsListView: View {
     @StateObject var authViewModel: AuthViewModel
     @StateObject var viewModel = ConversationsViewModel()
     @State private var isShowingGroupChatCreator = false
-
     @State private var showNewChat = false  // Added for new chat flow
     
     init(authViewModel: AuthViewModel) {
@@ -55,8 +54,10 @@ struct ConversationsListView: View {
                 }
             }
         }
-        .sheet(isPresented: $showNewChat) {
-            NewChatView()  // Your new chat creation view
+        .sheet(isPresented: $showNewChat, onDismiss: {
+            viewModel.fetchConversations()
+        }) {
+            NewChatView(authViewModel: authViewModel, isPresented: $showNewChat)  // Your new chat creation view
         }
         .sheet(isPresented: $isShowingGroupChatCreator) {
             NewGroupView() // Group chat creation view
